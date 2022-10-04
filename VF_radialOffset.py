@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "VF Radial Offset",
 	"author": "John Einselen - Vectorform LLC",
-	"version": (0, 1),
+	"version": (0, 2),
 	"blender": (2, 80, 0),
 	"location": "Scene > VF Tools > Radial Offset",
 	"description": "Radially offset vertices, maintaining relative distances",
@@ -24,7 +24,7 @@ import mathutils
 class vf_radial_offset(bpy.types.Operator):
 	bl_idname = "vfradialoffset.offset"
 	bl_label = "Radial Offset"
-	bl_description = "Radially offset vertices, maintaining relataive distances"
+	bl_description = "Radially offset vertices, maintaining relative distances"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	def execute(self, context):
@@ -41,10 +41,25 @@ class vf_radial_offset(bpy.types.Operator):
 		bpy.ops.object.mode_set(mode='OBJECT')
 		selectedVerts = [v for v in bpy.context.active_object.data.vertices if v.select]
 
+		# Process centre point
+		if bpy.context.scene.vf_radial_offset_settings.offset_point == 'BOUNDING':
+			minCo = selectedVerts[0].co.copy()
+			maxCo = selectedVerts[0].co.copy()
+			for vert in selectedVerts:
+				minCo[0] = min(minCo[0], vert.co[0])
+				minCo[1] = min(minCo[1], vert.co[1])
+				minCo[2] = min(minCo[2], vert.co[2])
+				maxCo[0] = max(maxCo[0], vert.co[0])
+				maxCo[1] = max(maxCo[1], vert.co[1])
+				maxCo[2] = max(maxCo[2], vert.co[2])
+			point = ((maxCo - minCo) * 0.5) + minCo
+		else:
+			point = mathutils.Vector((0.0, 0.0, 0.0))
+
 		# Process vertices
 		for vert in selectedVerts:
 			new_location = vert.co
-			radial_vector = (vert.co * channels).normalized()
+			radial_vector = ((vert.co - point) * channels).normalized()
 
 			if offset[0] != 0.0:
 				new_location[0] = new_location[0] + (radial_vector[0] * offset[0])
@@ -64,6 +79,14 @@ class vf_radial_offset(bpy.types.Operator):
 # Project settings and UI rendering classes
 
 class vfRadialOffsetSettings(bpy.types.PropertyGroup):
+	offset_point: bpy.props.EnumProperty(
+		name='Transform Point',
+		description='Centre point of the transform operation',
+		items=[
+			('OBJECT', 'Object Centre', 'Uses the mesh object centre point'),
+			('BOUNDING', 'Selection Centre', 'Uses the selected vertices bounding box centre point, not recommended for non-circular selection sets')
+			],
+		default='OBJECT')
 	offset_distance: bpy.props.FloatVectorProperty(
 		name="Radial Offset",
 		description="Radial offset while maintaining local relationships",
@@ -98,6 +121,7 @@ class VFTOOLS_PT_radial_offset(bpy.types.Panel):
 		try:
 			layout = self.layout
 			layout.use_property_decorate = False # No animation
+			layout.prop(context.scene.vf_radial_offset_settings, 'offset_point', text='')
 
 			col=layout.column()
 			col.prop(context.scene.vf_radial_offset_settings, 'offset_distance', text='')
