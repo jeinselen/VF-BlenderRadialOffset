@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "VF Radial Offset",
 	"author": "John Einselen - Vectorform LLC",
-	"version": (0, 2),
+	"version": (0, 2, 1),
 	"blender": (2, 80, 0),
 	"location": "Scene > VF Tools > Radial Offset",
 	"description": "Radially offset vertices, maintaining relative distances",
@@ -103,7 +103,8 @@ class VFTOOLS_PT_radial_offset(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = 'VF Tools'
-	bl_order = 0
+	bl_order = 6
+	bl_options = {'DEFAULT_CLOSED'}
 	bl_label = "Radial Offset"
 	bl_idname = "VFTOOLS_PT_radial_offset"
 
