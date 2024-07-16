@@ -1,5 +1,7 @@
 # VF Radial Offset
 
+This add-on was designed for Blender version 2.8-4.1 (though not all previous versions may be fully supported). For Blender 4.2 and onwards, [please see the new Mesh Kit extension](https://github.com/jeinselen/Blender-MeshKit).
+
 Offsets vertices radially to better preserve bevels and other spatial relationships, as opposed to scale.
 
 ![screenshot of the Blender 3D view interface with the add-on installed, showing two dimensions entered](images/screenshot2d.png)
